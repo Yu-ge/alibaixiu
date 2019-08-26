@@ -51,34 +51,35 @@
             </div>
             <div class="form-group">
               <label>邮箱</label>
-              <input name="email" class="form-control" type="email" placeholder="请输入邮箱">
+              <input name="email" class="form-control" type="email" id="email" placeholder="请输入邮箱">
             </div>
             <div class="form-group">
               <label>昵称</label>
-              <input name="nickName" class="form-control" type="text" placeholder="请输入昵称">
+              <input name="nickName" class="form-control" type="text" id="nickName" placeholder="请输入昵称">
             </div>
             <div class="form-group">
               <label>密码</label>
-              <input name="password" class="form-control" type="text" placeholder="请输入密码">
+              <input name="password" class="form-control" type="text" id="password" placeholder="请输入密码">
             </div>
             <div class="form-group">
               <div class="radio-inline">
-                <label><input type="radio" name="status" value="0">未激活</label>
+                <label><input type="radio" name="status" id="wjh" value="0">未激活</label>
               </div>
               <div class="radio-inline">
-                <label><input type="radio" name="status" value="1" checked>激活</label>
+                <label><input type="radio" name="status" value="1" id="jh" checked>激活</label>
               </div>
             </div>
             <div class="form-group">
               <div class="radio-inline">
-                <label><input type="radio" name="role" value="admin" checked>超级管理员</label>
+                <label><input type="radio" name="role" id="admin" value="admin" checked>超级管理员</label>
               </div>
               <div class="radio-inline">
-                <label><input type="radio" name="role" value='normal'>普通用户</label>
+                <label><input type="radio" name="role" id="normal" value='normal'>普通用户</label>
               </div>
             </div>
             <div class="form-group">
               <button class="btn btn-primary" type="button" id="addUser">添加</button>
+              <button class="btn btn-primary" type="button" id="editUser">修改</button>
             </div>
           </form>
         </div>
@@ -158,24 +159,25 @@
                 <td>{{$value.nickName}}</td>
                 <td>{{$value.status == 1?'激活':'未激活'}}</td>
                 <td>{{$value.status == admin?'超级管理员':'普通用户'}}</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
+                <td class="text-center" data-id='{{$value._id}}'>
+                  <a href="javascript:;" class="btn btn-default btn-xs edit">编辑</a>
                   <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
                 </td>
               </tr>
       {{/each}}
   </script>
   <script>
+    $('#editUser').hide();
     var userArr = [];
     //发送ajax
     $.ajax({
       url: '/users',
       type: 'get',
       success: function (res) {
-        console.log(res);
+        // console.log(res);
         userArr = res
         render(userArr)
-        
+
       }
     })
     function render(arr) {
@@ -196,6 +198,12 @@
           userArr.push(res)
           render(userArr)
           $('.form-control').val('');
+          $('#admin').prop('checked', true);
+          $('#normal').prop('checked', false);
+          $('#jh').prop('checked', true);
+          $('#wjh').prop('checked', false);
+          $('#addUser').show();
+          $('#editUser').hide();
         },
         error: function () {
           alert('添加失败')
@@ -203,32 +211,95 @@
       })
     })
     //头像添加
-    $('#avatar').on('change',function(){
+    $('#avatar').on('change', function () {
       //选择的文件
       var formdata = new FormData();
-      formdata.append('avatar',this.files[0])
+      formdata.append('avatar', this.files[0])
       $.ajax({
-        url:'/upload',
-        type:'post',
-        data:formdata,
+        url: '/upload',
+        type: 'post',
+        data: formdata,
         //告诉ajax不要解析数据
-        processData:false,
+        processData: false,
         //不要设置参数的类型
-        contentType:false,
-        success:function(res){
+        contentType: false,
+        success: function (res) {
           //头像预览
-          $('#preview').attr('src',res[0].avatar)
+          $('#preview').attr('src', res[0].avatar)
           $('#hiddenAvatar').val(res[0].avatar)
         }
       })
-      this.files[0]
+    })
+    //完成修改功能
+    var id;
+    $('tbody').on('click', '.edit', function () {
+      id = $(this).parent().attr('data-id')
+      // alert('ok')
+      $('form >h2').text('修改用户')
+      // $('#email').text
+      var trObj = $(this).parents('tr');
+      $('#email').val(trObj.children().eq(2).text())
+      $('#nickName').val(trObj.children().eq(3).text())
+
+      var status = trObj.children().eq(4).text();
+      var role = trObj.children().eq(5).text();
+      //图片
+      var imgSrc = trObj.children().eq(1).find('img').attr('src');
+      if (imgSrc) {
+        $('#preview').attr('src', imgSrc)
+        $('#hiddenAvatar').val(imgSrc)
+      } else {
+        $('#preview').attr('src', '../assets/img/default.png')
+
+      }
+      if (status == '激活') {
+        $("#jh").prop('checked', true)
+      } else {
+        $('#wjh').prop('checked', true)
+      }
+
+      if (role == '超级管理员') {
+        $("#admin").prop('checked', true)
+      } else {
+        $('#normal').prop('checked', true)
+      }
+      //按钮
+      $('#addUser').hide(),
+        $('editUser').show()
+
+
+    })
+    //给修改按钮注册事件
+    $('#editUser').on('click', function () {
+      var formData = $('form').serialize();
+      $.ajax({
+        type: 'put',
+        url: '/users/' + id,
+        data: formData,
+        success: function (res) {
+          var index = userArr.findIndex(item =>
+            item._id == res._id
+          )
+          userArr[index] = res;
+          render(userArr)
+          $('#preview').attr('src', '../assets/img/default.png')
+          $('.form-control').val('');
+          $('#admin').prop('checked', false);
+          $('#normal').prop('checked', true);
+          $('#jh').prop('checked', false);
+          $('#wjh').prop('checked', true);
+          $('form > h2').text('添加新用户');
+          $('#addUser').show();
+          $('#editUser').hide();
+        },
+      })
     })
   </script>
   <script>NProgress.done()</script>
   <script src="../assets/js/common.js">
 
   </script>
-  
+
 </body>
 
 </html>
