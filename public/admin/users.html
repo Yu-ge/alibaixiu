@@ -86,7 +86,7 @@
         <div class="col-md-8">
           <div class="page-action">
             <!-- show when multiple checked -->
-            <a class="btn btn-danger btn-sm" href="javascript:;" style="display: none">批量删除</a>
+            <a class="btn btn-danger btn-sm" href="javascript:;" id="allDel" style="display: none">批量删除</a>
           </div>
           <table class="table table-striped table-bordered table-hover">
             <thead>
@@ -161,7 +161,7 @@
                 <td>{{$value.status == admin?'超级管理员':'普通用户'}}</td>
                 <td class="text-center" data-id='{{$value._id}}'>
                   <a href="javascript:;" class="btn btn-default btn-xs edit">编辑</a>
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+                  <a href="javascript:;" data-id='{{$value._id}}' class="btn btn-danger btn-xs delete">删除</a>
                 </td>
               </tr>
       {{/each}}
@@ -282,6 +282,7 @@
           )
           userArr[index] = res;
           render(userArr)
+          // 重置
           $('#preview').attr('src', '../assets/img/default.png')
           $('.form-control').val('');
           $('#admin').prop('checked', false);
@@ -293,6 +294,49 @@
           $('#editUser').hide();
         },
       })
+    })
+    //删除单个
+    $('tbody').on('click','.delete',function(){
+      if (confirm('真的要删除吗？')){
+        var id = $(this).attr('data-id');
+        $.ajax({
+          type:'delete',
+          url:'/users/'+id,
+          success:function(res){
+            var index = userArr.findIndex(item=>item._id == res._id)
+            userArr.splice(index,1)
+            render(userArr)            
+          }
+        })
+      }
+    })
+    //实现全选功能
+    $('thead input[type="checkbox"]').on('click',function(){
+      var flag = $(this).prop('checked');
+      //tbody里面的复选框状态是由flag的只决定
+      $('tbody input[type="checkbox"]').prop('checked',flag);
+      if(flag){
+        $('#allDel').show()
+      }else{
+        $('#allDel').hide()
+      } 
+    })
+    $('tbody').on('click',' input[type="checkbox"]',function(){
+      // 如果下面的复选框选中的个数恰好等于他自身的长度，表示下面全选中
+      var checkLength = $('tbody input[type="checkbox"]').length;
+      var cLength = $('tbody input[type="checkbox"]:checked').length;
+      console.log(cLength);
+      
+      if(checkLength == cLength){
+        $('thead input[type="checkbox"]').prop('checked',true)
+      }else{
+        $('thead input[type="checkbox"]').prop('checked',false)
+      }
+      if(cLength>1){
+        $('#allDel').show()
+      }else{
+        $('#allDel').hide()
+      } 
     })
   </script>
   <script>NProgress.done()</script>
