@@ -32,14 +32,14 @@
       <!-- <div class="alert alert-danger">
         <strong>错误！</strong>发生XXX错误
       </div> -->
-      <form class="row">
+      <form class="row" id="addform">
         <div class="col-md-9">
           <div class="form-group">
             <label for="title">标题</label>
             <input id="title" class="form-control input-lg" name="title" type="text" placeholder="文章标题">
           </div>
           <div class="form-group">
-            <label for="content">标题</label>
+            <label for="content">内容</label>
             <textarea id="content" class="form-control input-lg" name="content" cols="30" rows="10" placeholder="内容"></textarea>
           </div>
         </div>
@@ -54,23 +54,23 @@
           <div class="form-group">
             <label for="category">所属分类</label>
             <select id="category" class="form-control" name="category">
-
+              <option>未分类</option>
              
             </select>
           </div>
           <div class="form-group">
             <label for="created">发布时间</label>
-            <input id="created" class="form-control" name="created" type="datetime-local">
+            <input id="created" class="form-control" name="createAt" type="datetime-local">
           </div>
           <div class="form-group">
             <label for="status">状态</label>
-            <select id="status" class="form-control" name="status">
-              <option value="drafted">草稿</option>
-              <option value="published">已发布</option>
+            <select id="status" class="form-control" name="state">
+              <option value="0">草稿</option>
+              <option value="1">已发布</option>
             </select>
           </div>
           <div class="form-group">
-            <button class="btn btn-primary" type="submit">保存</button>
+            <button class="btn btn-primary" type="button" id="padd">保存</button>
           </div>
         </div>
       </form>
@@ -130,11 +130,15 @@
     url:'/categories',
     type:'get',
     success:function(res){
-      console.log(res);
+      // console.log(res);
       var html = template('categoryTpl',{list:res})
-      $('#category').html(html);
+      $('#category').append(html);
     }
   })
+  function render(arr) {
+      var str = template('categoryTpl', { list: arr })
+      $('#category').html(str);
+    }
 //上传文件时
   $('#feature').on('change',function(){
     var file = this.files[0]
@@ -149,6 +153,20 @@
       contentType:false,
       success:function(res){
         $('#thumbnail').val(res[0].cover)
+      }
+    })
+  })
+
+  //添加文章
+  $('#padd').on('click',function(){
+    var formdata = $('form').serialize();
+    $.ajax({
+      type:'post',
+      url:'/posts',
+      data:formdata,
+      success:function(res){
+        // render(res)
+        location.href = '/admin/posts.html'
       }
     })
   })
