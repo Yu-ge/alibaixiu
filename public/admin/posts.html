@@ -60,7 +60,7 @@
             <th class="text-center" width="100">操作</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="postsBox">
           <!-- <tr>
             <td>随便一个名称</td>
             <td>小小</td>
@@ -149,7 +149,7 @@
         <td class="text-center">{{$value.state ==1?'已发布':'草稿'}}</td>
         <td class="text-center">
           <a href="post-add.html?id={{$value._id}}" class="btn btn-default btn-xs">编辑</a>
-          <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
+          <a href="javascript:;" class="btn btn-danger btn-xs delete" data-id="{{$value._id}}">删除</a>
         </td>
       </tr>
       {{/each }}
@@ -174,20 +174,20 @@
       {{/each}}
 
   </script>
-  
-  <script>  
-    
+
+  <script>
+
     // console.log(page);
-    
+
     var c = $('#category').val();
     var s = $('select[name="state"]').val()
     // console.log(c,s);
-    
+
     // template.defaults.imports.dateForm = formateDate;
     template.defaults.imports.dataFormat = dataFormat;
     function render(c, s, page = 1) {
       // console.log(c,s);
-      
+
       // console.log(page);
       // 请求服务器 获得所有文章并显示
       $.ajax({
@@ -200,19 +200,19 @@
         },
         success: function (res) {
           // console.log(res,111);
-          
+          window.currentpage = res.page
           var str = template('pTpl', { list: res })
           $('tbody').html(str);
 
           var pagestr = template('pageTpl', { list: res })
           $('#pages').html(pagestr);
           // console.log(page);
-        
-          
+
+
         },
-        error:function(){
+        error: function () {
           console.log('error');
-          
+
         }
       })
 
@@ -229,7 +229,7 @@
     //     },
     //     success: function (res) {
     //       // console.log(res,111);
-          
+
     //       var str = template('pTpl', { list: res })
     //       $('tbody').html(str);
 
@@ -237,8 +237,8 @@
     //       $('#pages').html(pagestr);
     //       // page = res.page
     //       // console.log(page);
-        
-          
+
+
     //     }
     //   })
     // console.log(page);
@@ -275,6 +275,28 @@
       var str = nDate.getFullYear() + '-' + (nDate.getMonth() + 1).toString().padStart(2, 0) + (nDate.getDate()).toString().padStart(2, 0);
       return str;
     }
+    $('#postsBox').on('click', '.delete', function () {
+      var isc = confirm('真的删除？')
+      if (isc) {
+        var id = $(this).attr('data-id')
+        $.ajax({
+          type: 'delete',
+          url: '/posts/' + id,
+          success: function () {
+            if ($('tbody').children().length == 1) {
+              if (currentpage == 1) {
+                render(c, s, currentpage)
+              } else {
+                render(c, s, currentpage - 1)
+              }
+            } else {
+              render(c, s, currentpage)
+            }
+
+          }
+        })
+      }
+    })
   </script>
   <script>NProgress.done()</script>
   <script src="../assets/js/common.js">
