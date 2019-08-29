@@ -1,9 +1,10 @@
 <script src="/login/status"></script>
-<script >
- if(!isLogin) location.href='login.html'
+<script>
+  if (!isLogin) location.href = 'login.html'
 </script>
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="utf-8">
   <title>Slides &laquo; Admin</title>
@@ -13,6 +14,7 @@
   <link rel="stylesheet" href="../assets/css/admin.css">
   <script src="../assets/vendors/nprogress/nprogress.js"></script>
 </head>
+
 <body>
   <script>NProgress.start()</script>
 
@@ -34,17 +36,18 @@
       </div> -->
       <div class="row">
         <div class="col-md-4">
-          <form>
+          <form id="slidesForm">
             <h2>添加新轮播内容</h2>
             <div class="form-group">
-              <label for="image">图片</label>
+              <label for="images">图片</label>
               <!-- show when image chose -->
-              <img class="help-block thumbnail" style="display: none">
-              <input id="image" class="form-control" name="image" type="file">
+              <img id="prev" class="help-block thumbnail" style="display: none">
+              <input id="images" class="form-control" type="file">
+              <input id="image" type="hidden" name="image">
             </div>
             <div class="form-group">
               <label for="text">文本</label>
-              <input id="text" class="form-control" name="text" type="text" placeholder="文本">
+              <input id="title" class="form-control" name="title" type="text" placeholder="文本">
             </div>
             <div class="form-group">
               <label for="link">链接</label>
@@ -66,22 +69,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td class="text-center"><img class="slide" src="../uploads/slide_1.jpg"></td>
-                <td>XIU功能演示</td>
-                <td>#</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
-              <tr>
-                <td class="text-center"><img class="slide" src="../uploads/slide_2.jpg"></td>
-                <td>XIU功能演示</td>
-                <td>#</td>
-                <td class="text-center">
-                  <a href="javascript:;" class="btn btn-danger btn-xs">删除</a>
-                </td>
-              </tr>
+
             </tbody>
           </table>
         </div>
@@ -128,9 +116,97 @@
 
   <script src="../assets/vendors/jquery/jquery.js"></script>
   <script src="../assets/vendors/bootstrap/js/bootstrap.js"></script>
+  <script src="../assets/vendors/art-template/template-web.js"></script>
+  <script type="text/html" id="slidesTpl">
+    {{each list}}
+    <tr>
+        <td class="text-center"><img class="slide" src="{{$value.image}}"></td>
+        <td>{{$value.title}}</td>
+        <td>{{$value.link}}</td>
+        <td class="text-center">
+          <a href="javascript:;" data-id = "{{$value._id}} " class= " delete btn btn-danger btn-xs">删除</a>
+        </td>
+      </tr>
+     {{/each}}
+  </script>
+  <script>
+
+    $('#images').on('change', function () {
+      var file = this.files[0];
+      var formData = new FormData();
+      formData.append('image', file)
+      $.ajax({
+        url: '/upload',
+        type: 'post',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+
+          $('#image').val(res[0].image)
+          // console.log($('#image').val());
+
+          $('#prev').show().attr('src', res[0].image)
+
+        }
+
+      })
+    })
+    var sArr = [];
+    $('#slidesForm').on('submit', function () {
+      var formData = $(this).serialize();
+      console.log(formData);
+
+      $.ajax({
+        type: 'post',
+        url: '/slides',
+        data: formData,
+        success: function (res) {
+          sArr.push(res)
+          render()
+          
+        }
+      })
+
+      return false;
+    })
+    $.ajax({
+      type: 'get',
+      url: '/slides',
+      success: function (res) {
+        sArr = res
+        render()
+      }
+    })
+    console.log(sArr);
+
+    //删除
+    $('tbody').on('click', '.delete', function () {
+      var id = $(this).attr('data-id')
+      if (confirm('真的要删除吗？')) {
+        $.ajax({
+          type: 'delete',
+          url: '/slides/' + id,
+          success: function (res) {
+
+            var index = sArr.findIndex(item => item._id == res._id)
+            sArr.splice(index, 1)
+            render(sArr)
+          }
+        })
+      }
+    })
+
+    function render() {
+      var str = template('slidesTpl', { list: sArr })
+      $('tbody').html(str);
+    }
+  </script>
+
   <script>NProgress.done()</script>
   <script src="../assets/js/common.js">
-  
+
   </script>
 </body>
+
 </html>

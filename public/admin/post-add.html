@@ -47,7 +47,7 @@
           <div class="form-group">
             <label for="feature">特色图像</label>
             <!-- show when image chose -->
-            <img class="help-block thumbnail" >
+            <img class="help-block thumbnail" id="prev"  style="display:none">
             <input id="feature" class="form-control" name="feature" type="file">
             <input type="hidden" name="thumbnail" id="thumbnail">
           </div>
@@ -155,6 +155,7 @@
       success:function(res){
         $('#thumbnail').val(res[0].cover)
         // $('#img').val(res[0].cover)
+        $('#prev').show().attr('src', res[0].cover)
       }
     })
   })
