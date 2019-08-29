@@ -71,6 +71,7 @@
           </div>
           <div class="form-group">
             <button class="btn btn-primary" type="button" id="padd">保存</button>
+            <button class="btn btn-primary" type="button" id="pedit" style="display:none">编辑</button>
           </div>
         </div>
       </form>
@@ -170,6 +171,62 @@
       }
     })
   })
+  //文章修改
+  var id = getUrlParmas('id')
+  if(id!=-1){
+    //编辑
+    $.ajax({
+      type:'get',
+      url:'/posts/'+id,
+      success:function(res){
+        $('#title').val(res.title);
+        $('#content').val(res.content);
+        $('h1').text('编辑文章');
+        //羽联图片
+        $('#prev').show().attr('src',res.thumbnail);
+        $('#img').val(res.thumbnail)
+
+        $('#category > option').each((index,item)=>{
+          if($(item).attr('value') == res.category){
+            $(item).prop('selected',true)
+          }
+        })
+        $('#status > option').each((index,item)=>{
+          if($(item).attr('value') == res.state){
+            $(item).prop('selected',true)
+          }
+        })
+        // console.log(res.createAt.substr(0,16));
+        
+        $('#created').val(res.createAt&& res.createAt.substr(0,16))
+        
+        $("#padd").hide();
+        $('#pedit').show()
+      }
+    })
+  }
+  $('#pedit').on('click',function(){
+    $.ajax({
+      type:'put',
+      url:'/posts/'+id,
+      data:$('form').serialize(),
+      success:function( res){
+        location.href = 'posts.html'
+      }
+    })
+  })
+  //从浏览器地址栏查询参数
+  function getUrlParmas(name){
+    // location.search
+    var paramsAry = location.search.substr(1).split('&')
+    for(var i = 0 ; i<paramsAry.length;i++){
+      var tmp = paramsAry[i].split('=')
+      if(tmp[0]==name){
+        return tmp[1]
+      }
+    }
+    return -1;
+  }
   </script>
   
   <script>NProgress.done()</script>
