@@ -255,7 +255,7 @@
       <span>分类: <a href="javascript:;">{{category.title}}</a></span>
       <span>阅读: ({{meta.views}})</span>
       <span>评论: ({{meta.comments}})</span>
-      
+      <a href="javascript:;" id="like">赞</a>
     </div>
     {{content}}
 </script>
@@ -270,6 +270,16 @@ $.ajax({
    var html=  template('postTpl',res)
     $('#article').html(html)
   } 
+})
+
+$('#article').on('click','#like',function(){
+  $.ajax({
+    type:'post',
+    url:'/posts/fabulous/'+cid,
+    success:function(){
+      alert('点赞成功')
+    }
+  })
 })
 </script>
 </body>
