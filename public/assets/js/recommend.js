@@ -107,3 +107,10 @@ $.ajax({
     }
     return -1;
   }
+
+  //搜索
+  $('.search form').on('submit',function(){
+    var keys = $(this).find('.keys').val() ;
+    location.href = '/search.html?key='+keys;
+    return false;
+  })

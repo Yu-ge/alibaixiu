@@ -201,6 +201,7 @@
       <div class="article" id="article">
         
       </div>
+      <div id="comment"></div>
       <div class="panel hots">
         <h3>热门推荐</h3>
         <ul id="recommendBox">
@@ -259,6 +260,33 @@
     </div>
     {{content}}
 </script>
+
+//评论模板
+<script type="text/html" id="commentTpl">
+  <style type="text/css">
+    .comment {
+      margin-bottom: 20px;
+    }
+    .comment textarea{
+      box-sizing: border-box;
+      padding: 10px;
+      width: 100%;
+      height: 80px;
+      display: block;
+    }
+    .comment input {
+      width: 100px;
+      height: 30px;
+      margin-top: 10px;
+    }
+  </style>
+  <div class="comment">
+    <form>
+      <textarea></textarea>
+      <input type="submit" value="提交评论">
+    </form>
+  </div>
+</script>
 <script>
 // var postid = getUrlParmas('id')
 $.ajax({
@@ -281,6 +309,49 @@ $('#article').on('click','#like',function(){
     }
   })
 })
+var review;
+// 获取网站配置
+$.ajax({
+  type:'get',
+  url:'/settings',
+  success:function(res){
+    review= res.review;
+    // 判断评论
+    if(res.comment){
+      // 管理员开启了评论功能 渲染评论模板
+			var html = template('commentTpl');
+			// 渲染评论模板
+			$('#comment').html(html);
+    }
+  }
+})
+$('#comment').on('submit','form',function(){
+  var t = $(this).find('textarea').val()
+  var state ;
+  if(review){
+    state =0
+  }else{
+    state= 1
+  }
+  $.ajax({
+  url:'/comments',
+  type:'get',
+  data:{
+    content:t,
+    post : cid,
+    state:state
+  },
+  success:function(){
+    // alert('成功')
+    location.reload()
+  },
+  error:function(){
+    alert('失败')
+  }
+})
+return false
+})
+
 </script>
 </body>
 
