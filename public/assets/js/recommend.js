@@ -42,7 +42,7 @@ $.ajax({
           $('#ramdoms').html(html)
       }
   })
-  template.defaults.imports.dataFormat = dataFormat;
+//   template.defaults.imports.dataFormat = dataFormat;
   //最新评论
   $.ajax({
       type:'get',
