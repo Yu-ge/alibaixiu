@@ -67,10 +67,10 @@
           <label class="col-sm-2 control-label">评论</label>
           <div class="col-sm-6">
             <div class="checkbox">
-              <label><input id="comment" name="comment" type="checkbox" value="true" checked>开启评论功能</label>
+              <label><input id="comment"  checked name="comment" type="checkbox" value="true" >开启评论功能</label>
             </div>
             <div class="checkbox">
-              <label><input id="review" name="review" type="checkbox" value="true" checked>评论必须经人工批准</label>
+              <label><input id="review" checked  name="review" type="checkbox" value="true"> >评论必须经人工批准</label>
             </div>
           </div>
         </div>
@@ -158,14 +158,25 @@
       })
     })
     $('#settingsForm').on('submit',function(){
+      if($('#comment').prop('checked')){
+        // $('#comment').attr('value',true)
+      }else{
+        $('#comment').prop('checked',false)
+        $(this).serialize() += "&comment=false"
+      }
+      console.log($(this).serialize());
+      return false
       var formdata=  $(this).serialize();
+      console.log(formdata);
+      
       $.ajax({
         type:'post',
         url:'/settings',
         data:formdata,
         success:function(res){
           // console.log(res);
-          location.onload()
+          // location.onload()
+          // location.reload()
         }
       })
       return false

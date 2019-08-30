@@ -315,6 +315,8 @@ $.ajax({
   type:'get',
   url:'/settings',
   success:function(res){
+    console.log(res);
+    
     review= res.review;
     // 判断评论
     if(res.comment){
