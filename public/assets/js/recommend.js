@@ -76,3 +76,21 @@ $.ajax({
     var str = nDate.getFullYear() + '-' + (nDate.getMonth() + 1).toString().padStart(2, 0) + (nDate.getDate()).toString().padStart(2, 0);
     return str;
   }
+
+  //文章分类导航
+  $.ajax({
+      url:'/categories',
+      type:'get',
+      success:function(res){
+        var str = `
+        {{each list}}
+        <li><a href="list.html?categoryId= {{$value._id}}">
+        <i class="fa {{$value.className}}"></i>{{$value.title}}</a></li>
+        {{/each}}
+        `
+        var html = template.render(str,{list:res})
+        $('#navBox').html(html)
+        $('#topnavBox').html(html)
+
+      }
+  })
