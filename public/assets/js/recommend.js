@@ -23,7 +23,7 @@ $.ajax({
       url:'/posts/random',
       type:'get',
       success:function(res){
-          console.log(res);
+        //   console.log(res);
           
           var str = `
           {{each list}}
@@ -84,7 +84,7 @@ $.ajax({
       success:function(res){
         var str = `
         {{each list}}
-        <li><a href="list.html?categoryId= {{$value._id}}">
+        <li><a href="list.html?categoryId={{$value._id}}">
         <i class="fa {{$value.className}}"></i>{{$value.title}}</a></li>
         {{/each}}
         `
@@ -94,3 +94,16 @@ $.ajax({
 
       }
   })
+
+  //从浏览器地址栏查询参数
+  function getUrlParmas(name){
+    // location.search
+    var paramsAry = location.search.substr(1).split('&')
+    for(var i = 0 ; i<paramsAry.length;i++){
+      var tmp = paramsAry[i].split('=')
+      if(tmp[0]==name){
+        return tmp[1]
+      }
+    }
+    return -1;
+  }
